@@ -25,7 +25,7 @@ def selenium_code(site_url):
 
 @app.route("/")
 def index():
-    return render_template("chat.html")
+    return render_template("index.html")
 
 @app.route("/automation", methods=["POST"])
 def run_automation():
