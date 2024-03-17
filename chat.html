@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #eeebeb;
+    }
+
+    .chat-container {
+        max-width: 400px;
+        margin: 20px auto;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .chat-header {
+        background-color: red;
+        color: #fff;
+        text-align: left;
+        padding: 10px;
+    }
+
+    .chat-box {
+        padding: 100px;
+        max-height: 800px;
+        overflow-y: auto;
+    }
+
+    .bot-message {
+        background-color: #ffc0cb;
+        border-radius: 200px;
+        padding: 20px;
+        margin-bottom: 8px;
+        text-align: right;
+    }
+</style>
+
+<head>
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=A0SDeHMK"></script>
+    <script>
+        let currentDriver = null;
+
+        function runAutomation() {
+            let searchKey = document.getElementById("search_key").value;
+
+            fetch('/automation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'search_key=' + encodeURIComponent(searchKey),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    let botMessage = data.bot_message;
+                    let driverKey = data.driver_key;
+
+                    // Display bot message and store current driver key
+                    document.getElementById("chat").innerHTML += "<p class='bot-message'>Bot: " + botMessage + "</p>";
+                    currentDriver = driverKey;
+                    speakResponse(botMessage);
+                });
+        }
+
+        function chat() {
+            let searchQuery = document.getElementById("search_query").value;
+
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'search_query=' + encodeURIComponent(searchQuery),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    let botMessage = data.bot_message;
+
+                    // Display bot message
+                    document.getElementById("chat").innerHTML += "<p class='bot-message'>Bot: " + botMessage + "</p>";
+
+                    // Faire parler la réponse
+                    speakResponse(botMessage);
+                });
+        }
+        function play() {
+            let videoQuery = document.getElementById("video_query").value;
+
+            fetch('/play/' + videoQuery)
+                .then(response => response.json())
+                .then(data => {
+                    let botMessage = data.bot_message;
+
+                    // Display bot message
+                    document.getElementById("chat").innerHTML += "<p class='bot-message'>Bot: " + botMessage + "</p>";
+                    // Faire parler la réponse
+                    speakResponse(botMessage);
+                });
+        }
+
+        function message_openDriver() {
+            let searchKey = document.getElementById("search_key").value;
+
+            fetch('/message_openDriver', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'search_key=' + encodeURIComponent(searchKey),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    let botMessage = data.bot_message;
+
+                    // Display bot message
+                    document.getElementById("chat").innerHTML += "<p class='bot-message'>Bot: " + botMessage + "</p>";
+                });
+        }
+
+        // Fonction pour faire parler la réponse
+        function speakResponse(response) {
+            // Obtenez toutes les voix disponibles
+            var voiceAvailable = responsiveVoice.getVoices();
+
+            // Utilisez la voix française féminine si disponible, sinon utilisez la voix par défaut
+            var selectedVoice = voiceAvailable.find(voice => voice.name === "French Female");
+
+            // Si la voix spécifiée est disponible, utilisez-la, sinon utilisez la voix par défaut
+            if (selectedVoice) {
+                responsiveVoice.speak(response, selectedVoice.name, { rate: 1.2 });
+            } else {
+                // Voix par défaut
+                responsiveVoice.speak(response, undefined, { rate: 1.2 });
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>Veronica Ai</h1>
+        </div>
+        <div class="chat-box" id="chat">
+            <!-- Chat messages will be displayed here -->
+        </div>
+        <div class="user-input">
+            <input type="text" id="search_query" placeholder="Search query...">
+            <button type="button" onclick="chat()">chat</button>
+            <input type="text" id="video_query" placeholder="Video query...">
+            <button type="button" onclick="play()">Play Video</button>
+            <input type="text" id="search_key" placeholder="Search key...">
+            <button type="button" onclick="runAutomation()">Run Automation</button>
+            <input type="text" id="search_key" placeholder="Search key...">
+            <button type="button" onclick="message_openDriver()">message open drive</button>
+            <input type="text" id="search_key" placeholder="Search key...">
+            <button type="button" onclick="openDriver()">Open Driver</button>
+
+        </div>
+    </div>
+</body>
+
+</html>
